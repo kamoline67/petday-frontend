@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import { styles } from '../styles/globalstyles';
-import Header from '../components/header';
-import Loading from '../components/loading';
+import Header from '../components/Layout/Header';
+import Footer from '../components/Layout/Footer';
+import Loading from '../components/UI/Loading';
+import Button from '../components/UI/Button';
+import Card from '../components/UI/Card';
+import Input from '../components/UI/Input';
 
-const Agendamento = ({ usuario, onLogout, onNavegarPara, dados }) => {
+const Agendamento = ({ usuario, onLogout, onNavigateTo, dados }) => {
     const [carregando, setCarregando] = useState(false);
     const [carregandoDados, setCarregandoDados] = useState(true);
     const [mensagem, setMensagem] = useState('');
@@ -22,6 +25,7 @@ const Agendamento = ({ usuario, onLogout, onNavegarPara, dados }) => {
     });
 
     const [agendamentos, setAgendamentos] = useState([]);
+    const [empresaSelecionada, setEmpresaSelecionada] = useState(null);
 
     useEffect(() => {
         carregarDados();
@@ -31,8 +35,10 @@ const Agendamento = ({ usuario, onLogout, onNavegarPara, dados }) => {
     useEffect(() => {
         if (novoAgendamento.empresa_id) {
             carregarServicos(novoAgendamento.empresa_id);
+            const empresa = empresas.find(e => e.empresa_id == novoAgendamento.empresa_id);
+            setEmpresaSelecionada(empresa);
         }
-    }, [novoAgendamento.empresa_id]);
+    }, [novoAgendamento.empresa_id, empresas]);
 
     const carregarDados = async () => {
         try {
@@ -44,8 +50,13 @@ const Agendamento = ({ usuario, onLogout, onNavegarPara, dados }) => {
             setPets(petsResponse.data.pets || []);
             setEmpresas(empresasResponse.data.empresas || []);
 
-            if(novoAgendamento.empresa_id) {
-                await carregarServicos(novoAgendamento.empresa_id);
+            if (dados?.empresa_id) {
+                setNovoAgendamento(prev => ({
+                    ...prev,
+                    empresa_id: dados.empresa_id,
+                    servicos: dados.servicosSelecionados.map(id => ({ servico_id: id }))
+                }));
+                await carregarServicos(dados.empresa_id);
             }
         } catch (error) {
             setMensagem('Erro ao carregar dados');
@@ -56,7 +67,7 @@ const Agendamento = ({ usuario, onLogout, onNavegarPara, dados }) => {
 
     const carregarServicos = async (empresaId) => {
         try {
-            const servicosResponse = await api.get(`/servicos/empresa/${empresaId}`);
+            const servicosResponse = await api.get(`/servicos?empresa_id=${empresaId}`);
             setServicos(servicosResponse.data.servicos || []);
         } catch (error) {
             setServicos([]);
@@ -87,6 +98,13 @@ const Agendamento = ({ usuario, onLogout, onNavegarPara, dados }) => {
         }
     };
 
+    const calcularTotal = () => {
+        return novoAgendamento.servicos.reduce((total, item) => {
+            const servico = servicos.find(s => s.servico_id === item.servico_id);
+            return total + (servico?.portes?.[0]?.preco_porte || 0);
+        }, 0);
+    };
+
     const criarAgendamento = async (e) => {
         e.preventDefault();
         setCarregando(true);
@@ -111,12 +129,13 @@ const Agendamento = ({ usuario, onLogout, onNavegarPara, dados }) => {
             
             setMensagem('Agendamento criado com sucesso!');
             setNovoAgendamento({
-                empresa_id: dados?.empresa_id || '',
+                empresa_id: '',
                 pet_id: '',
                 data_hora: '',
                 transporte: false,
-                servicos: dados?.servicosSelecionados ? dados.servicosSelecionados.map(id => ({ servico_id: id })) : []
+                servicos: []
             });
+            setEmpresaSelecionada(null);
             
             carregarAgendamentos();
         } catch (error) {
@@ -143,187 +162,269 @@ const Agendamento = ({ usuario, onLogout, onNavegarPara, dados }) => {
     };
 
     const getStatusColor = (status) => {
-        switch (status) {
-            case 'Agendado': return '#007bff';
-            case 'Confirmado': return '#28a745';
-            case 'Em Andamento': return '#ffc107';
-            case 'Finalizado': return '#6c757d';
-            case 'Cancelado': return '#dc3545';
-            default: return '#6c757d';
-        }
+        const cores = {
+            'Agendado': 'bg-blue-100 text-blue-700 border-blue-200',
+            'Confirmado': 'bg-green-100 text-green-700 border-green-200',
+            'Em Andamento': 'bg-yellow-100 text-yellow-700 border-yellow-200',
+            'Finalizado': 'bg-neutral-100 text-neutral-700 border-neutral-200',
+            'Cancelado': 'bg-red-100 text-red-700 border-red-200'
+        };
+        return cores[status] || 'bg-neutral-100 text-neutral-700 border-neutral-200';
     };
 
     if (carregandoDados) {
-        return <Loading mensagem="Carregando dados..." />;
+        return (
+            <div className="min-h-screen bg-neutral-50">
+                <Header onLogout={onLogout} onNavigateTo={onNavigateTo} />
+                <Loading mensagem="Carregando dados..." tamanho="lg" />
+            </div>
+        );
     }
 
     return (
-        <div style={styles.container}>
-            <Header 
-                titulo="Agendamentos" 
-                onLogout={onLogout}
-            />
-
-            {mensagem && (
-                <div style={mensagem.includes('Erro') ? styles.erro : styles.sucesso}>
-                    {mensagem}
-                </div>
-            )}
-
-            {dados?.empresa_id && (
-                <div style={styles.alerta}>
-                    <div style={styles.card}>
-                        <h3>Resumo do Pedido</h3>
-                        <p><strong>Petshop:</strong> {dados.empresa_nome}</p>
-                        <p><strong>Serviços selecionados:</strong> {
-                            servicos
-                                .filter(s => dados.servicosSelecionados?.includes(s.servico_id))
-                                .map(s => s.tipo)
-                                .join(', ')
-                        }</p>
-                    </div>
-                </div>
-            )}
-
-            <div style={styles.card}>
-                <h3>Preencha os dados do agendamento</h3>
-                <form onSubmit={criarAgendamento}>
-                    <div style={styles.formLinha}>
-                        <div style={styles.inputGroup}>
-                            <label>Pet:</label>
-                            <select
-                                value={novoAgendamento.pet_id}
-                                onChange={(e) => setNovoAgendamento({...novoAgendamento, pet_id: e.target.value})}
-                                style={styles.input}
-                                required
-                            >
-                                <option value="">Selecione um pet</option>
-                                {pets.map(pet => (
-                                    <option key={pet.pet_id} value={pet.pet_id}>
-                                        {pet.nome} ({pet.especie})
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div style={styles.inputGroup}>
-                            <label>Empresa:</label>
-                            <select
-                                value={novoAgendamento.empresa_id}
-                                onChange={(e) => {
-                                    setNovoAgendamento({
-                                        ...novoAgendamento, 
-                                        empresa_id: e.target.value,
-                                        servicos: []
-                                    });
-                                }}
-                                style={styles.input}
-                                required
-                            >
-                                <option value="">Selecione uma empresa</option>
-                                {empresas.map(empresa => (
-                                    <option key={empresa.empresa_id} value={empresa.empresa_id}>
-                                        {empresa.nome}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+        <div className="min-h-screen bg-neutral-50">
+            <Header onLogout={onLogout} onNavigateTo={onNavigateTo} />
+            
+            <div className="section-padding">
+                <div className="container-custom">
+                    {/* Header da Página */}
+                    <div className="text-center mb-12">
+                        <h1 className="text-display display-sm text-secondary-500 mb-4">
+                            Meus <span className="text-primary-500">Agendamentos</span>
+                        </h1>
+                        <p className="text-xl text-neutral-600 max-w-2xl mx-auto">
+                            Agende serviços para seus pets de forma rápida e organizada
+                        </p>
                     </div>
 
-                    <div style={styles.formLinha}>
-                        <div style={styles.inputGroup}>
-                            <label>Data e Hora:</label>
-                            <input
-                                type="datetime-local"
-                                value={novoAgendamento.data_hora}
-                                onChange={(e) => setNovoAgendamento({...novoAgendamento, data_hora: e.target.value})}
-                                style={styles.input}
-                                required
-                            />
+                    {mensagem && (
+                        <div className={`mb-8 p-4 rounded-2xl text-lg font-semibold ${
+                            mensagem.includes('Erro') 
+                                ? 'bg-red-50 text-red-700 border-2 border-red-200' 
+                                : 'bg-green-50 text-green-700 border-2 border-green-200'
+                        }`}>
+                            {mensagem}
                         </div>
+                    )}
 
-                        <div style={styles.inputGroup}>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <input
-                                    type="checkbox"
-                                    checked={novoAgendamento.transporte}
-                                    onChange={(e) => setNovoAgendamento({...novoAgendamento, transporte: e.target.checked})}
-                                />
-                                Transporte inclusivo
-                            </label>
-                        </div>
-                    </div>
+                    {/* Card de Novo Agendamento */}
+                    <Card padding="xl" className="mb-8">
+                        <h2 className="text-2xl font-display font-bold text-secondary-500 mb-6">
+                            {dados?.empresa_nome ? `Agendar em ${dados.empresa_nome}` : 'Novo Agendamento'}
+                        </h2>
+                        
+                        <form onSubmit={criarAgendamento} className="space-y-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* Seleção de Pet e Empresa */}
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="block text-lg font-semibold text-secondary-500 mb-2">
+                                            Selecione o Pet
+                                        </label>
+                                        <select
+                                            value={novoAgendamento.pet_id}
+                                            onChange={(e) => setNovoAgendamento({...novoAgendamento, pet_id: e.target.value})}
+                                            className="input-primary"
+                                            required
+                                        >
+                                            <option value="">Escolha um pet</option>
+                                            {pets.map(pet => (
+                                                <option key={pet.pet_id} value={pet.pet_id}>
+                                                    {pet.nome} ({pet.especie}) - {pet.porte?.descricao}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
 
-                    <div style={styles.inputGroup}>
-                        <label>Serviços:</label>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', marginTop: '10px' }}>
-                            {servicos.map(servico => (
-                                <label key={servico.servico_id} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={novoAgendamento.servicos.some(s => s.servico_id === servico.servico_id)}
-                                        onChange={(e) => handleServicoChange(servico.servico_id, e.target.checked)}
+                                    <div>
+                                        <label className="block text-lg font-semibold text-secondary-500 mb-2">
+                                            Selecione o Petshop
+                                        </label>
+                                        <select
+                                            value={novoAgendamento.empresa_id}
+                                            onChange={(e) => {
+                                                setNovoAgendamento({
+                                                    ...novoAgendamento, 
+                                                    empresa_id: e.target.value,
+                                                    servicos: []
+                                                });
+                                            }}
+                                            className="input-primary"
+                                            required
+                                        >
+                                            <option value="">Escolha um petshop</option>
+                                            {empresas.map(empresa => (
+                                                <option key={empresa.empresa_id} value={empresa.empresa_id}>
+                                                    {empresa.nome} - {empresa.telefone}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <Input
+                                        label="Data e Horário"
+                                        type="datetime-local"
+                                        value={novoAgendamento.data_hora}
+                                        onChange={(e) => setNovoAgendamento({...novoAgendamento, data_hora: e.target.value})}
+                                        required
                                     />
-                                    {servico.tipo} - R$ {servico.portes?.[0]?.preco_porte || '0.00'}
-                                </label>
-                            ))}
-                        </div>
-                    </div>
 
-                    <button 
-                        type="submit" 
-                        disabled={carregando}
-                        style={carregando ? styles.botaoDesabilitado : styles.botaoPrimario}
-                    >
-                        {carregando ? 'Agendando...' : 'Agendar'}
-                    </button>
-                </form>
-            </div>
-
-            <div style={styles.card}>
-                <h3>Meus Agendamentos</h3>
-                
-                {agendamentos.length === 0 ? (
-                    <p style={styles.textoCentro}>Nenhum agendamento encontrado.</p>
-                ) : (
-                    agendamentos.map(agendamento => (
-                        <div key={agendamento.agendamento_id} style={{
-                            ...styles.cardPet,
-                            borderLeft: `4px solid ${getStatusColor(agendamento.status)}`
-                        }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                <div>
-                                    <h4 style={styles.nomePet}>
-                                        {formatarData(agendamento.data_hora)}
-                                    </h4>
-                                    <p><strong>Pet:</strong> {agendamento.pet?.nome}</p>
-                                    <p><strong>Status:</strong> 
-                                        <span style={{ color: getStatusColor(agendamento.status), marginLeft: '5px' }}>
-                                            {agendamento.status}
-                                        </span>
-                                    </p>
-                                    <p><strong>Serviços:</strong> 
-                                        {agendamento.servicos?.map(s => s.tipo).join(', ')}
-                                    </p>
-                                    <p><strong>Endereço:</strong> {agendamento.endereco_atendimento}</p>
+                                    <div className="flex items-center space-x-3 p-4 bg-neutral-50 rounded-2xl">
+                                        <input
+                                            type="checkbox"
+                                            id="transporte"
+                                            checked={novoAgendamento.transporte}
+                                            onChange={(e) => setNovoAgendamento({...novoAgendamento, transporte: e.target.checked})}
+                                            className="w-5 h-5 text-primary-500 rounded focus:ring-primary-300"
+                                        />
+                                        <label htmlFor="transporte" className="text-lg font-semibold text-secondary-500 cursor-pointer">
+                                            🚗 Necessita transporte?
+                                        </label>
+                                    </div>
                                 </div>
-                                
-                                {agendamento.status === 'Agendado' && (
-                                    <button 
-                                        onClick={() => cancelarAgendamento(agendamento.agendamento_id)}
-                                        style={{
-                                            ...styles.botaoSecundario,
-                                            backgroundColor: '#dc3545'
-                                        }}
-                                    >
-                                        Cancelar
-                                    </button>
-                                )}
+
+                                {/* Seleção de Serviços */}
+                                <div>
+                                    <label className="block text-lg font-semibold text-secondary-500 mb-4">
+                                        Serviços Disponíveis
+                                    </label>
+                                    
+                                    {empresaSelecionada ? (
+                                        <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                                            {servicos.map(servico => (
+                                                <label 
+                                                    key={servico.servico_id}
+                                                    className={`flex items-center justify-between p-4 border-2 rounded-2xl cursor-pointer transition-all duration-300 ${
+                                                        novoAgendamento.servicos.some(s => s.servico_id === servico.servico_id)
+                                                            ? 'border-primary-500 bg-primary-50'
+                                                            : 'border-neutral-300 hover:border-primary-300'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-center space-x-3">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={novoAgendamento.servicos.some(s => s.servico_id === servico.servico_id)}
+                                                            onChange={(e) => handleServicoChange(servico.servico_id, e.target.checked)}
+                                                            className="w-5 h-5 text-primary-500 rounded focus:ring-primary-300"
+                                                        />
+                                                        <div>
+                                                            <div className="font-semibold text-secondary-500">
+                                                                {servico.tipo}
+                                                            </div>
+                                                            <div className="text-sm text-neutral-600">
+                                                                {servico.descricao}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-primary-500 font-bold text-lg">
+                                                        R$ {servico.portes?.[0]?.preco_porte || '0.00'}
+                                                    </div>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center p-8 bg-neutral-50 rounded-2xl">
+                                            <div className="text-4xl mb-2">🏪</div>
+                                            <p className="text-neutral-600">
+                                                Selecione um petshop para ver os serviços disponíveis
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))
-                )}
+
+                            {/* Resumo e Ação */}
+                            {novoAgendamento.servicos.length > 0 && (
+                                <Card className="bg-primary-50 border-primary-200">
+                                    <div className="flex justify-between items-center">
+                                        <div>
+                                            <div className="text-lg font-semibold text-secondary-500">
+                                                Total: <span className="text-primary-500 text-xl">R$ {calcularTotal().toFixed(2)}</span>
+                                            </div>
+                                            <div className="text-neutral-600">
+                                                {novoAgendamento.servicos.length} serviço(s) selecionado(s)
+                                            </div>
+                                        </div>
+                                        <Button 
+                                            type="submit" 
+                                            disabled={carregando}
+                                            loading={carregando}
+                                        >
+                                            Confirmar Agendamento
+                                        </Button>
+                                    </div>
+                                </Card>
+                            )}
+                        </form>
+                    </Card>
+
+                    {/* Histórico de Agendamentos */}
+                    <Card padding="xl">
+                        <h2 className="text-2xl font-display font-bold text-secondary-500 mb-6">
+                            Meus Agendamentos
+                        </h2>
+                        
+                        {agendamentos.length === 0 ? (
+                            <div className="text-center py-12">
+                                <div className="text-6xl mb-4">📅</div>
+                                <h3 className="text-xl font-semibold text-secondary-500 mb-2">
+                                    Nenhum agendamento encontrado
+                                </h3>
+                                <p className="text-neutral-600">
+                                    Você ainda não fez nenhum agendamento. Que tal agendar o primeiro?
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {agendamentos.map(agendamento => (
+                                    <Card key={agendamento.agendamento_id} hover padding="lg">
+                                        <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
+                                            <div className="flex-1">
+                                                <div className="flex items-start justify-between mb-3">
+                                                    <div>
+                                                        <h4 className="text-xl font-bold text-secondary-500 mb-1">
+                                                            {formatarData(agendamento.data_hora)}
+                                                        </h4>
+                                                        <p className="text-neutral-600">
+                                                            {agendamento.pet?.nome} • {agendamento.endereco_atendimento}
+                                                        </p>
+                                                    </div>
+                                                    <span className={`px-3 py-1 rounded-full text-sm font-semibold border ${getStatusColor(agendamento.status)}`}>
+                                                        {agendamento.status}
+                                                    </span>
+                                                </div>
+                                                
+                                                <div className="flex flex-wrap gap-2 mb-3">
+                                                    {agendamento.servicos?.map((servico, index) => (
+                                                        <span 
+                                                            key={index}
+                                                            className="px-3 py-1 bg-primary-100 text-primary-700 rounded-lg text-sm font-medium"
+                                                        >
+                                                            {servico.tipo}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            
+                                            {agendamento.status === 'Agendado' && (
+                                                <Button 
+                                                    variant="outline"
+                                                    onClick={() => cancelarAgendamento(agendamento.agendamento_id)}
+                                                    className="bg-red-500 text-white border-red-500 hover:bg-red-600 hover:border-red-600"
+                                                >
+                                                    Cancelar
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </Card>
+                                ))}
+                            </div>
+                        )}
+                    </Card>
+                </div>
             </div>
+
+            <Footer />
         </div>
     );
 };

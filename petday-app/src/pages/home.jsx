@@ -1,416 +1,163 @@
 import React from 'react';
-import { styles } from '../styles/globalstyles';
 import { estaLogado, getUsuarioAtual } from '../utils/auth';
+import Button from '../components/UI/Button';
+import Card from '../components/UI/Card';
+import Header from '../components/Layout/Header';
+import Footer from '../components/Layout/Footer';
 
-const Home = ({ onNavigateToLogin, onNavigateToFeed }) => {
-    const usuario = getUsuarioAtual();
+const Home = ({ onNavigateToLogin, onNavigateToFeed, onLogout, onNavigateTo }) => {
+  const usuario = getUsuarioAtual();
 
-    return (
-        <div style={styles.app}>
-            <header style={{
-                backgroundColor: 'white',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                position: 'sticky',
-                top: 0,
-                zIndex: 1000
-            }}>
-                <div style={{
-                    maxWidth: '1200px',
-                    margin: '0 auto',
-                    padding: '1rem 2rem',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ fontSize: '2rem' }}>🐾</span>
-                        <h1 style={{ 
-                            margin: 0, 
-                            color: '#007bff',
-                            fontSize: '1.8rem',
-                            fontWeight: 'bold'
-                        }}>
-                            PetDay
-                        </h1>
-                    </div>
-                    
-                    <nav>
-                        {estaLogado() ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                <span style={{ color: '#666' }}>Olá, {usuario.nome}!</span>
-                                <button 
-                                    onClick={onNavigateToFeed}
-                                    style={{
-                                        ...styles.botaoPrimario,
-                                        padding: '10px 20px',
-                                        width: 'auto'
-                                    }}
-                                >
-                                    Acessar App
-                                </button>
-                            </div>
-                        ) : (
-                            <button 
-                                onClick={onNavigateToLogin}
-                                style={{
-                                    ...styles.botaoPrimario,
-                                    padding: '10px 20px',
-                                    width: 'auto'
-                                }}
-                            >
-                                Entrar
-                            </button>
-                        )}
-                    </nav>
-                </div>
-            </header>
-
-            <section style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                padding: '100px 2rem',
-                textAlign: 'center'
-            }}>
-                <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-                    <h1 style={{ 
-                        fontSize: '3.5rem', 
-                        marginBottom: '1rem',
-                        fontWeight: 'bold'
-                    }}>
-                        Cuide do seu pet com amor e praticidade
-                    </h1>
-                    <p style={{ 
-                        fontSize: '1.3rem', 
-                        marginBottom: '2rem',
-                        opacity: 0.9
-                    }}>
-                        Agende banho, tosa, vacina e muito mais para seu melhor amigo
-                    </p>
-                    {!estaLogado() && (
-                        <button 
-                            onClick={onNavigateToLogin}
-                            style={{
-                                ...styles.botaoPrimario,
-                                backgroundColor: 'white',
-                                color: '#667eea',
-                                padding: '15px 30px',
-                                fontSize: '1.1rem',
-                                width: 'auto',
-                                fontWeight: 'bold'
-                            }}
-                        >
-                            Entrar
-                        </button>
-                    )}
-                </div>
-            </section>
-
-            <section style={{ padding: '80px 2rem', backgroundColor: 'white' }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <h2 style={{ 
-                        textAlign: 'center', 
-                        marginBottom: '3rem',
-                        fontSize: '2.5rem',
-                        color: '#333'
-                    }}>
-                        Por que escolher o PetDay?
-                    </h2>
-                    <div style={{ 
-                        display: 'grid', 
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-                        gap: '2rem' 
-                    }}>
-                        {[
-                            {
-                                icon: '🚿',
-                                title: 'Banho & Tosa',
-                                description: 'Agende serviços de higiene e beleza para seu pet com profissionais especializados'
-                            },
-                            {
-                                icon: '⏰',
-                                title: 'Agendamento Fácil',
-                                description: 'Agende serviços em poucos cliques, no horário que preferir'
-                            },
-                            {
-                                icon: '📍',
-                                title: 'Encontre Perto de Você',
-                                description: 'Descubra os melhores petshops na sua região'
-                            },
-                        ].map((feature, index) => (
-                            <div key={index} style={{
-                                textAlign: 'center',
-                                padding: '2rem',
-                                borderRadius: '10px',
-                                backgroundColor: '#f8f9fa',
-                                transition: 'transform 0.3s ease',
-                                cursor: 'pointer'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = 'translateY(-5px)';
-                                e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'translateY(0)';
-                                e.currentTarget.style.boxShadow = 'none';
-                            }}
-                            >
-                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>
-                                    {feature.icon}
-                                </div>
-                                <h3 style={{ 
-                                    marginBottom: '1rem',
-                                    color: '#333',
-                                    fontSize: '1.3rem'
-                                }}>
-                                    {feature.title}
-                                </h3>
-                                <p style={{ 
-                                    color: '#666',
-                                    lineHeight: '1.6'
-                                }}>
-                                    {feature.description}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            <section style={{ padding: '80px 2rem', backgroundColor: '#f8f9fa' }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <h2 style={{ 
-                        textAlign: 'center', 
-                        marginBottom: '3rem',
-                        fontSize: '2.5rem',
-                        color: '#333'
-                    }}>
-                        Como funciona
-                    </h2>
-                    <div style={{ 
-                        display: 'grid', 
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-                        gap: '2rem' 
-                    }}>
-                        {[
-                            { step: '1', title: 'Crie sua conta', description: 'Cadastre-se em menos de 2 minutos' },
-                            { step: '2', title: 'Encontre serviços', description: 'Busque por petshops e serviços na sua área' },
-                            { step: '3', title: 'Agende', description: 'Escolha data, horário e serviços desejados' },
-                            { step: '4', title: 'Aproveite', description: 'Deixe seu pet nas mãos de profissionais' }
-                        ].map((step, index) => (
-                            <div key={index} style={{
-                                textAlign: 'center',
-                                padding: '2rem'
-                            }}>
-                                <div style={{
-                                    width: '60px',
-                                    height: '60px',
-                                    borderRadius: '50%',
-                                    backgroundColor: '#007bff',
-                                    color: 'white',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '1.5rem',
-                                    fontWeight: 'bold',
-                                    margin: '0 auto 1rem'
-                                }}>
-                                    {step.step}
-                                </div>
-                                <h3 style={{ 
-                                    marginBottom: '1rem',
-                                    color: '#333'
-                                }}>
-                                    {step.title}
-                                </h3>
-                                <p style={{ color: '#666' }}>
-                                    {step.description}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            <section style={{ padding: '80px 2rem', backgroundColor: 'white' }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <h2 style={{ 
-                        textAlign: 'center', 
-                        marginBottom: '3rem',
-                        fontSize: '2.5rem',
-                        color: '#333'
-                    }}>
-                        Nossa Equipe
-                    </h2>
-                    <div style={{ 
-                        display: 'grid', 
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-                        gap: '2rem' 
-                    }}>
-                        {[
-                            {
-                                name: 'Kamoline Redivo',
-                                role: 'Desenvolvedora',
-                                bio: 'Responsável pelo frontend e backend do Petday.',
-                                avatar: '👩‍💻'
-                            },
-                            {
-                                name: 'Marco Antônio',
-                                role: 'Marketing',
-                                bio: 'Cuida da comunicação do projeto Petday.',
-                                avatar: '👨‍💻'
-                            },
-                            {
-                                name: 'Nathan Vitor',
-                                role: 'Lider do Projeto',
-                                bio: 'Lider do projeto Petday',
-                                avatar: '👩‍🎨'
-                            },
-                            {
-                                name: 'João Vitor Mariano',
-                                role: 'Desenvolvedor',
-                                bio: 'Responsável pela criação do site Petday.',
-                                avatar: '👨‍💼'
-                            },
-                            {
-                                name: 'João Paulo Oto',
-                                role: 'Desenvolvedor',
-                                bio: 'Responsável pela criação do site Petday.',
-                                avatar: '👨‍💼'
-                            },
-                            {
-                                name: 'Leonardo Paz Gaieski',
-                                role: 'Desenvolvedor',
-                                bio: 'Responsável pela criação do site Petday.',
-                                avatar: '👨‍💼'
-                            }
-                            
-                        ].map((member, index) => (
-                            <div key={index} style={{
-                                textAlign: 'center',
-                                padding: '2rem',
-                                borderRadius: '10px',
-                                backgroundColor: '#f8f9fa',
-                                transition: 'transform 0.3s ease'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = 'translateY(-5px)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'translateY(0)';
-                            }}
-                            >
-                                <div style={{ 
-                                    fontSize: '4rem',
-                                    marginBottom: '1rem'
-                                }}>
-                                    {member.avatar}
-                                </div>
-                                <h3 style={{ 
-                                    marginBottom: '0.5rem',
-                                    color: '#333',
-                                    fontSize: '1.3rem'
-                                }}>
-                                    {member.name}
-                                </h3>
-                                <p style={{ 
-                                    color: '#007bff',
-                                    fontWeight: 'bold',
-                                    marginBottom: '1rem'
-                                }}>
-                                    {member.role}
-                                </p>
-                                <p style={{ 
-                                    color: '#666',
-                                    lineHeight: '1.6'
-                                }}>
-                                    {member.bio}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* CTA Section */}
-            {!estaLogado() && (
-                <section style={{
-                    padding: '80px 2rem',
-                    backgroundColor: '#007bff',
-                    color: 'white',
-                    textAlign: 'center'
-                }}>
-                    <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-                        <h2 style={{ 
-                            fontSize: '2.5rem',
-                            marginBottom: '1rem'
-                        }}>
-                            Pronto para começar?
-                        </h2>
-                        <p style={{ 
-                            fontSize: '1.2rem',
-                            marginBottom: '2rem',
-                            opacity: 0.9
-                        }}>
-                            Junte-se a centenas de tutores que já cuidam de seus pets com o PetDay
-                        </p>
-                        <button 
-                            onClick={onNavigateToLogin}
-                            style={{
-                                ...styles.botaoPrimario,
-                                backgroundColor: 'white',
-                                color: '#007bff',
-                                padding: '15px 40px',
-                                fontSize: '1.1rem',
-                                width: 'auto',
-                                fontWeight: 'bold'
-                            }}
-                        >
-                            Criar Minha Conta
-                        </button>
-                    </div>
-                </section>
+  return (
+    <div className="min-h-screen bg-neutral-50">
+      <Header onLogout={onLogout} onNavigateTo={onNavigateTo} />
+      
+      {/* Hero Section */}
+      <section className="gradient-bg text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="container-custom section-padding relative">
+          <div className="text-center max-w-5xl mx-auto">
+            <h1 className="text-display display-lg mb-8 animate-fade-in">
+              Cuidamos do seu
+              <span className="block text-secondary-200 drop-shadow-2xl">
+                melhor amigo
+              </span>
+            </h1>
+            <p className="text-2xl md:text-3xl text-white/90 mb-12 leading-relaxed max-w-3xl mx-auto">
+              Agendamento online para banho, tosa, vacina e muito mais. 
+              <span className="block font-semibold">Rápido, seguro e com amor.</span>
+            </p>
+            {!estaLogado() ? (
+              <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                <Button 
+                  size="xl"
+                  onClick={onNavigateToLogin}
+                  className="bg-white text-primary-500 hover:bg-neutral-100"
+                >
+                  Começar Agora 🚀
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="xl"
+                  className="border-white text-white hover:bg-white hover:text-primary-500"
+                >
+                  Conhecer Mais
+                </Button>
+              </div>
+            ) : (
+              <Button 
+                size="xl"
+                onClick={onNavigateToFeed}
+                className="bg-white text-primary-500 hover:bg-neutral-100"
+              >
+                Acessar Meu App 🐾
+              </Button>
             )}
-
-            {/* Footer */}
-            <footer style={{
-                backgroundColor: '#333',
-                color: 'white',
-                padding: '3rem 2rem',
-                textAlign: 'center'
-            }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'center', 
-                        alignItems: 'center',
-                        gap: '10px',
-                        marginBottom: '1rem'
-                    }}>
-                        <span style={{ fontSize: '2rem' }}>🐾</span>
-                        <h3 style={{ margin: 0 }}>PetDay</h3>
-                    </div>
-                    <p style={{ marginBottom: '2rem', opacity: 0.8 }}>
-                        Cuidando do seu pet com tecnologia e amor
-                    </p>
-                    <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'center', 
-                        gap: '2rem',
-                        marginBottom: '2rem',
-                        flexWrap: 'wrap'
-                    }}>
-                        <a href="#sobre" style={{ color: 'white', textDecoration: 'none' }}>Sobre</a>
-                        <a href="#servicos" style={{ color: 'white', textDecoration: 'none' }}>Serviços</a>
-                        <a href="#equipe" style={{ color: 'white', textDecoration: 'none' }}>Equipe</a>
-                        <a href="#contato" style={{ color: 'white', textDecoration: 'none' }}>Contato</a>
-                    </div>
-                    <p style={{ opacity: 0.6 }}>
-                        &copy; 2024 PetDay. Todos os direitos reservados.
-                    </p>
-                </div>
-            </footer>
+          </div>
         </div>
-    );
+        
+        {/* Floating Elements */}
+        <div className="absolute top-1/4 left-10 w-32 h-32 bg-primary-300 rounded-full blur-3xl opacity-30 animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-10 w-48 h-48 bg-primary-400 rounded-full blur-3xl opacity-30 animate-pulse"></div>
+      </section>
+
+      {/* Features Section */}
+      <section className="section-padding bg-white">
+        <div className="container-custom">
+          <div className="text-center mb-20">
+            <h2 className="text-display display-md text-secondary-500 mb-6">
+              Por que o <span className="text-primary-500">PetDay</span>?
+            </h2>
+            <p className="text-2xl text-neutral-700 max-w-3xl mx-auto">
+              Tudo que seu pet precisa, com a praticidade que você merece
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            {[
+              {
+                icon: '🚿',
+                title: 'Banho & Tosa Premium',
+                description: 'Serviços de higiene e beleza com produtos de qualidade e profissionais especializados',
+              },
+              {
+                icon: '⏰',
+                title: 'Agendamento Inteligente',
+                description: 'Agende em poucos cliques, escolha o melhor horário e receba lembretes automáticos',
+              },
+              {
+                icon: '📍',
+                title: 'Petshops Verificados',
+                description: 'Estabelecimentos avaliados e certificados, garantindo a melhor experiência para seu pet',
+              },
+            ].map((feature, index) => (
+              <Card key={index} hover padding="xl" className="text-center">
+                <div className="w-20 h-20 bg-primary-500 rounded-3xl flex items-center justify-center text-3xl text-white mb-6 mx-auto shadow-2xl">
+                  {feature.icon}
+                </div>
+                <h3 className="text-2xl font-bold text-secondary-500 mb-4">
+                  {feature.title}
+                </h3>
+                <p className="text-neutral-700 text-lg leading-relaxed">
+                  {feature.description}
+                </p>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="section-padding bg-secondary-500 text-white">
+        <div className="container-custom">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+            {[
+              { number: '2.5k+', label: 'Pets Atendidos' },
+              { number: '50+', label: 'Petshops Parceiros' },
+              { number: '4.9', label: 'Avaliação Média' },
+              { number: '24/7', label: 'Suporte' },
+            ].map((stat, index) => (
+              <div key={index} className="animate-scale-in">
+                <div className="text-4xl md:text-5xl font-display font-black text-primary-400 mb-2">
+                  {stat.number}
+                </div>
+                <div className="text-lg text-neutral-300 font-semibold">
+                  {stat.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      {!estaLogado() && (
+        <section className="section-padding bg-white">
+          <div className="container-custom text-center">
+            <Card padding="xl" className="max-w-4xl mx-auto gradient-bg text-white">
+              <h2 className="text-display display-sm mb-6">
+                Pronto para transformar
+                <span className="block">o cuidado do seu pet?</span>
+              </h2>
+              <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+                Junte-se a milhares de tutores que já descobriram a forma mais fácil 
+                e segura de cuidar de seus animais de estimação
+              </p>
+              <Button 
+                size="xl"
+                onClick={onNavigateToLogin}
+                className="bg-white text-primary-500 hover:bg-neutral-100"
+              >
+                Criar Minha Conta Gratuita
+              </Button>
+            </Card>
+          </div>
+        </section>
+      )}
+
+      <Footer />
+    </div>
+  );
 };
 
 export default Home;

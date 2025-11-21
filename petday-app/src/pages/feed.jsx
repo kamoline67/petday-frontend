@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import { styles } from '../styles/globalstyles';
-import Header from '../components/header';
-import Loading from '../components/loading';
+import Header from '../components/Layout/Header';
+import Footer from '../components/Layout/Footer';
+import Loading from '../components/UI/Loading';
+import Button from '../components/UI/Button';
+import Card from '../components/UI/Card';
+import Input from '../components/UI/Input';
 
-const Feed = ({ usuario, onLogout, onNavegarPara }) => {
+const Feed = ({ usuario, onLogout, onNavigateTo }) => {
     const [empresas, setEmpresas] = useState([]);
     const [servicos, setServicos] = useState([]);
     const [carregando, setCarregando] = useState(true);
     const [mensagem, setMensagem] = useState('');
     const [categoriaAtiva, setCategoriaAtiva] = useState('todos');
+    const [pesquisa, setPesquisa] = useState('');
 
     useEffect(() => {
         carregarDados();
@@ -32,14 +36,14 @@ const Feed = ({ usuario, onLogout, onNavegarPara }) => {
     };
 
     const verDetalhesPetshop = (empresa) => {
-        onNavegarPara('petshop-detail', { empresa });
+        onNavigateTo('petshop-detail', { empresa });
     };
 
     const agendarDireto = (servico, empresa) => {
-        onNavegarPara('agendamento', { 
+        onNavigateTo('agendamento', { 
             empresa_id: empresa.empresa_id,
             servicosSelecionados: [servico.servico_id],
-            servicoInicial: servico
+            empresa_nome: empresa.nome
         });
     };
 
@@ -48,130 +52,165 @@ const Feed = ({ usuario, onLogout, onNavegarPara }) => {
         servicos: servicos.filter(servico => servico.empresa_id === empresa.empresa_id)
     })).filter(empresa => empresa.servicos.length > 0);
 
-    const categorias = ['todos', 'banho', 'tosa', 'vacina'];
+    const empresasFiltradas = servicosPorEmpresa.filter(empresa => 
+        empresa.nome.toLowerCase().includes(pesquisa.toLowerCase()) ||
+        empresa.servicos.some(servico => 
+            servico.tipo.toLowerCase().includes(pesquisa.toLowerCase())
+        )
+    );
+
+    const categorias = [
+        { id: 'todos', nome: 'Todos', icone: '🐾' },
+        { id: 'banho', nome: 'Banho', icone: '🚿' },
+        { id: 'tosa', nome: 'Tosa', icone: '✂️' },
+        { id: 'veterinario', nome: 'Veterinário', icone: '🏥' },
+        { id: 'vacina', nome: 'Vacina', icone: '💉' }
+    ];
 
     if (carregando) {
-        return <Loading mensagem="Carregando petshops..." />;
+        return (
+            <div className="min-h-screen bg-neutral-50">
+                <Header onLogout={onLogout} onNavigateTo={onNavigateTo} />
+                <Loading mensagem="Carregando petshops..." tamanho="lg" />
+            </div>
+        );
     }
 
     return (
-        <div style={styles.container}>
-            <Header 
-                titulo="Encontre o melhor para seu pet" 
-                onLogout={onLogout}
-            />
-
-            {mensagem && (
-                <div style={mensagem.includes('Erro') ? styles.erro : styles.sucesso}>
-                    {mensagem}
-                </div>
-            )}
-
-            <div style={{
-                ...styles.card,
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                textAlign: 'center'
-            }}>
-                <h2>Bem-vindo, {usuario?.nome}! 🎉</h2>
-                <p>Encontre os melhores serviços para seu pet</p>
-            </div>
-
-            <div style={{ marginBottom: '20px', overflowX: 'auto' }}>
-                <div style={{ display: 'flex', gap: '10px', padding: '10px 0' }}>
-                    {categorias.map(categoria => (
-                        <button
-                            key={categoria}
-                            onClick={() => setCategoriaAtiva(categoria)}
-                            style={{
-                                padding: '10px 20px',
-                                border: 'none',
-                                borderRadius: '25px',
-                                backgroundColor: categoriaAtiva === categoria ? '#007bff' : '#f8f9fa',
-                                color: categoriaAtiva === categoria ? 'white' : '#333',
-                                cursor: 'pointer',
-                                whiteSpace: 'nowrap'
-                            }}
-                        >
-                            {categoria === 'todos' ? 'Todos' :
-                             categoria === 'banho' ? 'Banho' :
-                             categoria === 'tosa' ? 'Tosa' :
-                             categoria === 'vacina' ? 'Vacina' : categoria}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            <div>
-                {servicosPorEmpresa.length === 0 ? (
-                    <div style={styles.card}>
-                        <p style={styles.textoCentro}>Nenhum petshop encontrado na sua área.</p>
-                    </div>
-                ) : (
-                    servicosPorEmpresa.map(empresa => (
-                        <div key={empresa.empresa_id} style={{
-                            ...styles.card,
-                            marginBottom: '20px',
-                            cursor: 'pointer'
-                        }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                <div style={{ flex: 1 }}>
-                                    <h3 style={{ color: '#333', marginBottom: '10px' }}>{empresa.nome}</h3>
-                                    <p style={{ color: '#666', marginBottom: '15px' }}>
-                                        <span style={{ marginRight: '15px' }}> {empresa.telefone}</span>
-                                    </p>
-                                    
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '15px' }}>
-                                        {empresa.servicos.slice(0, 3).map(servico => (
-                                            <span
-                                                key={servico.servico_id}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    agendarDireto(servico, empresa);
-                                                }}
-                                                style={{
-                                                    padding: '5px 12px',
-                                                    backgroundColor: '#e3f2fd',
-                                                    color: '#1976d2',
-                                                    borderRadius: '15px',
-                                                    fontSize: '14px',
-                                                    cursor: 'pointer',
-                                                    border: '1px solid #bbdefb'
-                                                }}
-                                            >
-                                                {servico.tipo} - R$ {servico.portes?.[0]?.preco_porte || '0.00'}
-                                            </span>
-                                        ))}
-                                        {empresa.servicos.length > 3 && (
-                                            <span style={{
-                                                padding: '5px 12px',
-                                                backgroundColor: '#f5f5f5',
-                                                color: '#666',
-                                                borderRadius: '15px',
-                                                fontSize: '14px'
-                                            }}>
-                                                +{empresa.servicos.length - 3} mais
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                                
-                                <button 
-                                    onClick={() => verDetalhesPetshop(empresa)}
-                                    style={{
-                                        ...styles.botaoPrimario,
-                                        width: 'auto',
-                                        padding: '8px 16px',
-                                        fontSize: '14px'
-                                    }}
-                                >
-                                    Ver Serviços
-                                </button>
+        <div className="min-h-screen bg-neutral-50">
+            <Header onLogout={onLogout} onNavigateTo={onNavigateTo} />
+            
+            <div className="section-padding">
+                <div className="container-custom">
+                    {/* Hero Section */}
+                    <Card className="gradient-bg text-white text-center mb-8">
+                        <div className="max-w-2xl mx-auto">
+                            <h1 className="text-display display-sm mb-4">
+                                Encontre o melhor para seu <span className="text-secondary-200">pet</span>
+                            </h1>
+                            <p className="text-xl text-white/90 mb-6">
+                                Descubra petshops incríveis e serviços de qualidade perto de você
+                            </p>
+                            
+                            {/* Barra de Pesquisa */}
+                            <div className="max-w-md mx-auto">
+                                <Input
+                                    type="text"
+                                    placeholder="🔍 Pesquisar petshops ou serviços..."
+                                    value={pesquisa}
+                                    onChange={(e) => setPesquisa(e.target.value)}
+                                    className="bg-white/20 border-white/30 text-white placeholder-white/70"
+                                />
                             </div>
                         </div>
-                    ))
-                )}
+                    </Card>
+
+                    {mensagem && (
+                        <div className={`mb-6 p-4 rounded-2xl text-lg font-semibold ${
+                            mensagem.includes('Erro') 
+                                ? 'bg-red-50 text-red-700 border-2 border-red-200' 
+                                : 'bg-green-50 text-green-700 border-2 border-green-200'
+                        }`}>
+                            {mensagem}
+                        </div>
+                    )}
+
+                    {/* Filtros de Categoria */}
+                    <div className="mb-8 overflow-x-auto">
+                        <div className="flex space-x-3 pb-4">
+                            {categorias.map(categoria => (
+                                <button
+                                    key={categoria.id}
+                                    onClick={() => setCategoriaAtiva(categoria.id)}
+                                    className={`flex items-center space-x-2 px-6 py-3 rounded-2xl font-semibold text-lg whitespace-nowrap transition-all duration-300 ${
+                                        categoriaAtiva === categoria.id
+                                            ? 'bg-primary-500 text-white shadow-lg'
+                                            : 'bg-white text-secondary-600 hover:bg-primary-50 hover:text-primary-500 border border-neutral-200'
+                                    }`}
+                                >
+                                    <span>{categoria.icone}</span>
+                                    <span>{categoria.nome}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Lista de Petshops */}
+                    <div className="space-y-6">
+                        {empresasFiltradas.length === 0 ? (
+                            <Card padding="xl" className="text-center">
+                                <div className="text-6xl mb-4">🐕</div>
+                                <h3 className="text-2xl font-bold text-secondary-500 mb-2">
+                                    Nenhum petshop encontrado
+                                </h3>
+                                <p className="text-neutral-600 text-lg">
+                                    {pesquisa ? 'Tente alterar os termos da pesquisa' : 'Não encontramos petshops na sua área no momento'}
+                                </p>
+                            </Card>
+                        ) : (
+                            empresasFiltradas.map(empresa => (
+                                <Card key={empresa.empresa_id} hover padding="xl">
+                                    <div className="flex flex-col lg:flex-row justify-between items-start gap-6">
+                                        <div className="flex-1">
+                                            <div className="flex items-start space-x-4 mb-4">
+                                                <div className="w-16 h-16 bg-primary-500 rounded-2xl flex items-center justify-center text-2xl text-white shadow-lg">
+                                                    🏪
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-2xl font-display font-bold text-secondary-500 mb-1">
+                                                        {empresa.nome}
+                                                    </h3>
+                                                    <p className="text-neutral-600">
+                                                        📞 {empresa.telefone}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex flex-wrap gap-3 mb-4">
+                                                {empresa.servicos.slice(0, 4).map(servico => (
+                                                    <span
+                                                        key={servico.servico_id}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            agendarDireto(servico, empresa);
+                                                        }}
+                                                        className="px-4 py-2 bg-primary-100 text-primary-700 rounded-xl font-semibold cursor-pointer hover:bg-primary-200 transition-all duration-300 border border-primary-200 hover:scale-105"
+                                                    >
+                                                        {servico.tipo} - R$ {servico.portes?.[0]?.preco_porte || '0.00'}
+                                                    </span>
+                                                ))}
+                                                {empresa.servicos.length > 4 && (
+                                                    <span className="px-4 py-2 bg-neutral-200 text-neutral-700 rounded-xl font-semibold">
+                                                        +{empresa.servicos.length - 4} mais
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex flex-col space-y-3">
+                                            <Button 
+                                                onClick={() => verDetalhesPetshop(empresa)}
+                                            >
+                                                Ver Detalhes
+                                            </Button>
+                                            {empresa.servicos.length === 1 && (
+                                                <Button 
+                                                    variant="outline"
+                                                    onClick={() => agendarDireto(empresa.servicos[0], empresa)}
+                                                >
+                                                    Agendar Direto
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </Card>
+                            ))
+                        )}
+                    </div>
+                </div>
             </div>
+
+            <Footer />
         </div>
     );
 };

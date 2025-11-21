@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { styles } from './styles/globalstyles';
 import { estaLogado, getUsuarioAtual, removerUsuario, salvarUsuario } from './utils/auth';
+
+import Home from './pages/home';
 import Login from './pages/login';
 import Cadastro from './pages/cadastro';
+import Feed from './pages/feed';
 import Pets from './pages/pets';
 import Agendamento from './pages/agendamento';
-import Pagamento from './pages/pagamento';
 import Perfil from './pages/perfil';
-import Feed from './pages/feed';
+import Pagamento from './pages/pagamento';
 import PetshopDetalhes from './pages/petshop-detalhes';
-import Home from './pages/home';
 
 function App() {
     const [usuario, setUsuario] = useState(null);
@@ -18,6 +18,7 @@ function App() {
     const [dadosNavegacao, setDadosNavegacao] = useState({});
 
     useEffect(() => {
+
         if (estaLogado()) {
             setUsuario(getUsuarioAtual());
         }
@@ -25,8 +26,8 @@ function App() {
     }, []);
 
     const handleLoginSuccess = (usuarioData) => {
-         setUsuario(usuarioData);
-         setPaginaAtual('feed');
+        setUsuario(usuarioData);
+        setPaginaAtual('feed');
     };
 
     const handleRegisterSuccess = (usuarioData) => {
@@ -38,6 +39,7 @@ function App() {
         removerUsuario();
         setUsuario(null);
         setPaginaAtual('home');
+        setDadosNavegacao({});
     };
 
     const handleUsuarioAtualizado = (novosDados) => {
@@ -52,67 +54,101 @@ function App() {
     };
 
     const renderizarPagina = () => {
+        const propsComuns = {
+            onLogout: handleLogout,
+            onNavigateTo: navegarPara,
+        };
+
         switch (paginaAtual) {
             case 'home':
-                return <Home onNavigateToLogin={() => navegarPara('login')} onNavigateToFeed={() => navegarPara('feed')} />;
+                return <Home
+                    onLogout={handleLogout}
+                    onNavigateTo={navegarPara} 
+                    onNavigateToLogin={() => navegarPara('login')} 
+                    onNavigateToFeed={() => navegarPara('feed')}
+                    {...propsComuns}
+                />;
+                
             case 'login':
-                return <Login onLoginSuccess={handleLoginSuccess} onNavigateToRegister={() => navegarPara('cadastro')} onNavigateToHome={() => navegarPara('home')} />;
+                return <Login 
+                    onLoginSuccess={handleLoginSuccess} 
+                    onNavigateToRegister={() => navegarPara('cadastro')}
+                    onNavigateToHome={() => navegarPara('home')}
+                    {...propsComuns}
+                />;
+                
             case 'cadastro': 
-                return <Cadastro onRegisterSuccess={handleRegisterSuccess} onBackToLogin={() => navegarPara('login')} />;
+                return <Cadastro 
+                    onRegisterSuccess={handleRegisterSuccess} 
+                    onBackToLogin={() => navegarPara('login')}
+                    onNavigateToHome={() => navegarPara('home')}
+                    {...propsComuns}
+                />;
+                
             case 'feed':
-                return <Feed usuario={usuario} onLogout={handleLogout} onNavegarPara={navegarPara} />;
+                return <Feed 
+                    usuario={usuario} 
+                    dados={dadosNavegacao}
+                    {...propsComuns}
+                />;
+                
             case 'petshop-detalhes':
-                return <PetshopDetalhes usuario={usuario} onLogout={handleLogout} dados={dadosNavegacao} onNavegarPara={navegarPara} />;
+                return <PetshopDetalhes 
+                    usuario={usuario} 
+                    dados={dadosNavegacao}
+                    {...propsComuns}
+                />;
+                
             case 'agendamento':
-                return <Agendamento usuario={usuario} onLogout={handleLogout} dados={dadosNavegacao} onNavegarPara={navegarPara} />;
+                return <Agendamento 
+                    usuario={usuario} 
+                    dados={dadosNavegacao}
+                    {...propsComuns}
+                />;
+                
             case 'pagamento':
-                return <Pagamento usuario={usuario} onLogout={handleLogout} onNavegarPara={navegarPara} />;
+                return <Pagamento 
+                    usuario={usuario} 
+                    {...propsComuns}
+                />;
+                
             case 'perfil':
-                return <Perfil usuario={usuario} onLogout={handleLogout} onUsuarioAtualizado={handleUsuarioAtualizado} onNavegarPara={navegarPara} />;
+                return <Perfil 
+                    usuario={usuario} 
+                    onUsuarioAtualizado={handleUsuarioAtualizado}
+                    {...propsComuns}
+                />;
+                
             case 'pets':
-                return <Pets usuario={usuario} onLogout={handleLogout} onNavegarPara={navegarPara} />;
+                return <Pets 
+                    usuario={usuario} 
+                    {...propsComuns}
+                />;
+                
             default:
-                return <Home onNavigatoToLogin={() => setPaginaAtual('login')} onNavigateToFeed={() => setPaginaAtual('feed')} />;
+                return <Home 
+                    onNavigateToLogin={() => navegarPara('login')} 
+                    onNavigateToFeed={() => navegarPara('feed')}
+                    {...propsComuns}
+                />;
         }
     };
 
-    const MenuNavegacao = () => (
-        <nav style={styles.navegacao}>
-            <button
-                onClick={() => navegarPara('feed')}
-                style={paginaAtual === 'feed' ? styles.botaoAtivo : styles.botaoNavegacao}>
-                    Inicio
-            </button>
-            <button
-                onClick={() => navegarPara('pets')}
-                style={paginaAtual === 'pets' ? styles.botaoAtivo : styles.botaoNavegacao}>
-                    Pets
-            </button>
-            <button
-                onClick={() => navegarPara('agendamento')}
-                style={paginaAtual === 'agendamento' ? styles.botaoAtivo : styles.botaoNavegacao}>
-                    Meus Agendamentos
-            </button>
-            <button
-                onClick={() => navegarPara('perfil')}
-                style={paginaAtual === 'perfil' ? styles.botaoAtivo : styles.botaoNavegacao}>
-                    Perfil
-            </button>
-        </nav>
-    );
-
     if (carregando) {
         return (
-            <div style={styles.app}>
-                <div style={styles.container}>
-                    <div style={styles.textoCentro}>Carregando...</div>
+            <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="w-16 h-16 bg-primary-500 rounded-2xl flex items-center justify-center text-2xl text-white mb-4 mx-auto animate-pulse">
+                        🐾
+                    </div>
+                    <p className="text-secondary-500 text-lg font-semibold">Carregando PetDay...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div style={styles.app}>
+        <div className="App">
             {renderizarPagina()}
         </div>
     );

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import { styles } from '../styles/globalstyles';
-import Header from '../components/header';
-import Loading from '../components/loading';
+import Header from '../components/Layout/Header';
+import Footer from '../components/Layout/Footer';
+import Loading from '../components/UI/Loading';
+import Button from '../components/UI/Button';
+import Card from '../components/UI/Card';
+import ServicoCard from '../components/Card/ServicoCard';
 
-const PetshopDetalhes = ({ usuario, onLogout, onNavegarPara, dados }) => {
+const PetshopDetalhes = ({ usuario, onLogout, onNavigateTo, dados }) => {
     const [servicos, setServicos] = useState([]);
     const [carregando, setCarregando] = useState(true);
     const [mensagem, setMensagem] = useState('');
@@ -45,125 +48,197 @@ const PetshopDetalhes = ({ usuario, onLogout, onNavegarPara, dados }) => {
     };
 
     const agendar = () => {
-        onNavegarPara('agendamento', { 
+        onNavigateTo('agendamento', { 
             empresa_id: empresa.empresa_id,
             servicosSelecionados,
             empresa_nome: empresa.nome
         });
     };
 
+    const getServicosSelecionadosNomes = () => {
+        return servicosSelecionados.map(id => {
+            const servico = servicos.find(s => s.servico_id === id);
+            return servico?.tipo;
+        }).filter(Boolean);
+    };
+
     if (carregando) {
-        return <Loading mensagem="Carregando serviços..." />;
+        return (
+            <div className="min-h-screen bg-neutral-50">
+                <Header onLogout={onLogout} onNavigateTo={onNavigateTo} />
+                <Loading mensagem="Carregando serviços..." tamanho="lg" />
+            </div>
+        );
     }
 
     return (
-        <div style={styles.container}>
-            <Header 
-                titulo={empresa.nome} 
-                onLogout={onLogout}
-            />
+        <div className="min-h-screen bg-neutral-50">
+            <Header onLogout={onLogout} onNavigateTo={onNavigateTo} />
+            
+            <div className="section-padding">
+                <div className="container-custom max-w-4xl">
+                    {/* Header do Petshop */}
+                    <Card padding="xl" className="gradient-bg text-white mb-8">
+                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
+                            <div className="flex items-center space-x-4 mb-4 md:mb-0">
+                                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-2xl backdrop-blur-sm">
+                                    🏪
+                                </div>
+                                <div>
+                                    <h1 className="text-3xl font-display font-bold mb-1">
+                                        {empresa.nome}
+                                    </h1>
+                                    <p className="text-white/90">
+                                        📞 {empresa.telefone}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="text-center md:text-right">
+                                <div className="text-2xl font-bold mb-1">
+                                    {servicos.length} serviços
+                                </div>
+                                <div className="text-white/80">
+                                    disponíveis
+                                </div>
+                            </div>
+                        </div>
+                    </Card>
 
-            {mensagem && (
-                <div style={mensagem.includes('Erro') ? styles.erro : styles.sucesso}>
-                    {mensagem}
+                    {mensagem && (
+                        <div className={`mb-8 p-4 rounded-2xl text-lg font-semibold ${
+                            mensagem.includes('Erro') 
+                                ? 'bg-red-50 text-red-700 border-2 border-red-200' 
+                                : 'bg-green-50 text-green-700 border-2 border-green-200'
+                        }`}>
+                            {mensagem}
+                        </div>
+                    )}
+
+                    {/* Lista de Serviços */}
+                    <Card padding="xl">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-display font-bold text-secondary-500">
+                                Serviços Disponíveis
+                            </h2>
+                            <div className="text-lg text-neutral-600">
+                                <span className="font-bold text-primary-500">{servicosSelecionados.length}</span> selecionados
+                            </div>
+                        </div>
+                        
+                        {servicos.length === 0 ? (
+                            <div className="text-center py-12">
+                                <div className="text-6xl mb-4">🔧</div>
+                                <h3 className="text-xl font-semibold text-secondary-500 mb-2">
+                                    Nenhum serviço disponível
+                                </h3>
+                                <p className="text-neutral-600">
+                                    Este petshop ainda não cadastrou serviços no momento
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {servicos.map(servico => (
+                                    <ServicoCard
+                                        key={servico.servico_id}
+                                        servico={servico}
+                                        selecionado={servicosSelecionados.includes(servico.servico_id)}
+                                        onToggle={toggleServico}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </Card>
+
+                    {/* Informações Adicionais */}
+                    <Card padding="xl" className="mt-8">
+                        <h3 className="text-xl font-display font-bold text-secondary-500 mb-4">
+                            💡 Sobre este estabelecimento
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                            <div className="space-y-3">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center text-primary-500">
+                                        ⏰
+                                    </div>
+                                    <div>
+                                        <div className="font-semibold text-secondary-500">Horário de Funcionamento</div>
+                                        <div className="text-neutral-600">Segunda a Sábado: 8h às 18h</div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center text-primary-500">
+                                        🚗
+                                    </div>
+                                    <div>
+                                        <div className="font-semibold text-secondary-500">Estacionamento</div>
+                                        <div className="text-neutral-600">Disponível para clientes</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center text-primary-500">
+                                        📍
+                                    </div>
+                                    <div>
+                                        <div className="font-semibold text-secondary-500">Localização</div>
+                                        <div className="text-neutral-600">Zona Central - Próximo ao centro</div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center text-primary-500">
+                                        ⭐
+                                    </div>
+                                    <div>
+                                        <div className="font-semibold text-secondary-500">Avaliação</div>
+                                        <div className="text-neutral-600">4.8/5 (124 avaliações)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </Card>
                 </div>
-            )}
-
-            <div style={styles.card}>
-                <h2>{empresa.nome}</h2>
-                <p style={{ color: '#666', marginBottom: '20px' }}>
-                    {empresa.telefone}
-                </p>
             </div>
 
-            <div style={styles.card}>
-                <h3 style={{ marginBottom: '20px' }}>Serviços Disponíveis</h3>
-                
-                {servicos.length === 0 ? (
-                    <p style={styles.textoCentro}>Nenhum serviço disponível.</p>
-                ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                        {servicos.map(servico => (
-                            <div
-                                key={servico.servico_id}
-                                onClick={() => toggleServico(servico.servico_id)}
-                                style={{
-                                    padding: '15px',
-                                    border: `2px solid ${servicosSelecionados.includes(servico.servico_id) ? '#007bff' : '#e0e0e0'}`,
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    backgroundColor: servicosSelecionados.includes(servico.servico_id) ? '#f0f8ff' : 'white',
-                                    transition: 'all 0.2s'
-                                }}
-                            >
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                    <div style={{ flex: 1 }}>
-                                        <h4 style={{ margin: '0 0 5px 0', color: '#333' }}>
-                                            {servico.tipo}
-                                        </h4>
-                                        <p style={{ margin: '0', color: '#666', fontSize: '14px' }}>
-                                            {servico.descricao}
-                                        </p>
-                                    </div>
-                                    <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontWeight: 'bold', color: '#007bff', fontSize: '18px' }}>
-                                            R$ {servico.portes?.[0]?.preco_porte || '0.00'}
+            {/* Barra Fixa Inferior para Agendamento */}
+            {servicosSelecionados.length > 0 && (
+                <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 shadow-2xl z-40">
+                    <div className="container-custom max-w-4xl">
+                        <div className="flex flex-col sm:flex-row justify-between items-center py-4 gap-4">
+                            <div className="flex-1">
+                                <div className="flex items-center space-x-4">
+                                    <div className="text-right">
+                                        <div className="text-2xl font-bold text-primary-500">
+                                            R$ {calcularTotal().toFixed(2)}
                                         </div>
-                                        <div style={{ 
-                                            fontSize: '12px', 
-                                            color: servicosSelecionados.includes(servico.servico_id) ? '#007bff' : '#666',
-                                            marginTop: '5px'
-                                        }}>
-                                            {servicosSelecionados.includes(servico.servico_id) ? '✓ Selecionado' : 'Clique para selecionar'}
+                                        <div className="text-sm text-neutral-600">
+                                            {servicosSelecionados.length} serviço(s) selecionado(s)
+                                        </div>
+                                    </div>
+                                    <div className="hidden sm:block border-l border-neutral-300 h-8"></div>
+                                    <div className="hidden sm:block">
+                                        <div className="text-sm font-semibold text-secondary-500 mb-1">
+                                            Serviços escolhidos:
+                                        </div>
+                                        <div className="text-xs text-neutral-600 max-w-md truncate">
+                                            {getServicosSelecionadosNomes().join(', ')}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-
-            {servicosSelecionados.length > 0 && (
-                <div style={{
-                    position: 'fixed',
-                    bottom: '0',
-                    left: '0',
-                    right: '0',
-                    backgroundColor: 'white',
-                    padding: '15px 20px',
-                    borderTop: '1px solid #e0e0e0',
-                    boxShadow: '0 -2px 10px rgba(0,0,0,0.1)'
-                }}>
-                    <div style={{ 
-                        maxWidth: '800px', 
-                        margin: '0 auto',
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center' 
-                    }}>
-                        <div>
-                            <div style={{ fontWeight: 'bold', fontSize: '18px' }}>
-                                R$ {calcularTotal().toFixed(2)}
-                            </div>
-                            <div style={{ color: '#666', fontSize: '14px' }}>
-                                {servicosSelecionados.length} serviço(s) selecionado(s)
-                            </div>
+                            <Button 
+                                onClick={agendar}
+                                size="lg"
+                                className="whitespace-nowrap"
+                            >
+                                Agendar Agora →
+                            </Button>
                         </div>
-                        <button 
-                            onClick={agendar}
-                            style={{
-                                ...styles.botaoPrimario,
-                                width: 'auto',
-                                padding: '12px 30px',
-                                fontSize: '16px'
-                            }}
-                        >
-                            Agendar Agora →
-                        </button>
                     </div>
                 </div>
             )}
+
+            <Footer />
         </div>
     );
 };
