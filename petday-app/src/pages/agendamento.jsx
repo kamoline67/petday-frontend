@@ -241,7 +241,6 @@ const Agendamento = ({ usuario, onLogout }) => {
                 </form>
             </div>
 
-            {/* Lista de Agendamentos */}
             <div style={styles.card}>
                 <h3>Meus Agendamentos</h3>
                 
