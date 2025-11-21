@@ -151,5 +151,18 @@ export const styles = {
         borderRadius: '4px',
         margin: '10px 0',
         border: '1px solid #f5c6cb',
+    },
+
+    loading: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '2rem'
+    },
+
+    skeleton: {
+        backgroundColor: '#e0e0e0',
+        borderRadius: '4px',
+        Animation: 'pulse 1.5s ease-in-out infinite'
     }
 }
