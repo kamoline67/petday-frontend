@@ -1,7 +1,7 @@
 import React from 'react';
 import { styles } from '../styles/globalstyles';
 
-const petCard = ({ pet }) => {
+const PetCard = ({ pet }) => {
     const getSexoTexto = (sexo) => {
         switch(sexo) {
             case 'M': return 'Macho';
@@ -22,4 +22,4 @@ const petCard = ({ pet }) => {
     );
 };
 
-export default petCard;
+export default PetCard;

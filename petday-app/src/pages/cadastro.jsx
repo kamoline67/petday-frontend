@@ -1,4 +1,4 @@
-import React, { use, useState } from 'react';
+import React, { useState } from 'react';
 import api from '../services/api';
 import { styles } from '../styles/globalstyles';
 import { salvarUsuario } from '../utils/auth';

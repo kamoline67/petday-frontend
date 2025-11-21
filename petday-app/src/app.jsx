@@ -7,6 +7,8 @@ import Pets from './pages/pets';
 import Agendamento from './pages/agendamento';
 import Pagamento from './pages/pagamento';
 import Perfil from './pages/perfil';
+import Feed from './pages/feed';
+import PetshopDetalhes from './pages/petshop-detalhes';
 
 function App() {
     const [usuario, setUsuario] = useState(null);
@@ -57,7 +59,7 @@ function App() {
             case 'agendamento':
                 return <Agendamento usuario={usuario} onLogout={handleLogout} dados={dadosNavegacao} onNavegarPara={navegarPara} />;
             case 'pagamento':
-                return <Pagamento usuario={usuario} onLogout={handleLogout} dados={dadosNavegacao} onNavegarPara={navegarPara} />;
+                return <Pagamento usuario={usuario} onLogout={handleLogout} onNavegarPara={navegarPara} />;
             case 'perfil':
                 return <Perfil usuario={usuario} onLogout={handleLogout} onUsuarioAtualizado={handleUsuarioAtualizado} onNavegarPara={navegarPara} />;
             case 'pets':
@@ -67,7 +69,7 @@ function App() {
         }
     };
 
-    const MenuNavegacao = () => {
+    const MenuNavegacao = () => (
         <nav style={styles.navegacao}>
             <button
                 onClick={() => navegarPara('feed')}
@@ -90,7 +92,7 @@ function App() {
                     Perfil
             </button>
         </nav>
-    };
+    );
 
     if (carregando) {
         return (

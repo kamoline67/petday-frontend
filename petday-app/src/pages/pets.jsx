@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { styles } from '../styles/globalstyles';
 import Header from '../components/header';
-import petCard from '../components/petCard';
+import PetCard from '../components/petCard';
 import Loading from '../components/loading';
 
 const Pets = ({ usuario, onLogout }) => {
@@ -177,7 +177,7 @@ const Pets = ({ usuario, onLogout }) => {
                     <p style={styles.textoCentro}>Nenhum pet cadastrado ainda.</p>
                 ) : (
                     pets.map(pet => (
-                        <petCard key={pet.pet_id} pet={pet} />
+                        <PetCard key={pet.pet_id} pet={pet} />
                     ))
                 )}
             </div>
