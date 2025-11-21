@@ -4,7 +4,7 @@ import { styles } from '../styles/globalstyles';
 import Header from '../components/header';
 import Loading from '../components/loading';
 
-const Agendamento = ({ usuario, onLogout }) => {
+const Agendamento = ({ usuario, onLogout, onNavegarPara, dados }) => {
     const [carregando, setCarregando] = useState(false);
     const [carregandoDados, setCarregandoDados] = useState(true);
     const [mensagem, setMensagem] = useState('');
@@ -14,11 +14,11 @@ const Agendamento = ({ usuario, onLogout }) => {
     const [empresas, setEmpresas] = useState([]);
     
     const [novoAgendamento, setNovoAgendamento] = useState({
-        empresa_id: '',
+        empresa_id: dados?.empresa_id || '',
         pet_id: '',
         data_hora: '',
         transporte: false,
-        servicos: []
+        servicos: dados?.servicosSelecionados ? dados.servicosSelecionados.map(id => ({ servico_id: id })) : []
     });
 
     const [agendamentos, setAgendamentos] = useState([]);
@@ -28,22 +28,39 @@ const Agendamento = ({ usuario, onLogout }) => {
         carregarAgendamentos();
     }, []);
 
+    useEffect(() => {
+        if (novoAgendamento.empresa_id) {
+            carregarServicos(novoAgendamento.empresa_id);
+        }
+    }, [novoAgendamento.empresa_id]);
+
     const carregarDados = async () => {
         try {
-            const [petsResponse, servicosResponse, empresasResponse] = await Promise.all([
+            const [petsResponse, empresasResponse] = await Promise.all([
                 api.get('/pets'),
-                api.get('/servicos'),
                 api.get('/empresas')
             ]);
 
             setPets(petsResponse.data.pets || []);
-            setServicos(servicosResponse.data.servicos || []);
             setEmpresas(empresasResponse.data.empresas || []);
-            
+
+            if(novoAgendamento.empresa_id) {
+                await carregarServicos(novoAgendamento.empresa_id);
+            }
         } catch (error) {
             setMensagem('Erro ao carregar dados');
         } finally {
             setCarregandoDados(false);
+        }
+    };
+
+    const carregarServicos = async (empresaId) => {
+        try {
+            const servicosResponse = await api.get(`/servicos/empresa/${empresaId}`);
+            setServicos(servicosResponse.data.servicos || []);
+        } catch (error) {
+            setServicos([]);
+            setMensagem('Erro ao carregar serviços da empresa');
         }
     };
 
@@ -94,11 +111,11 @@ const Agendamento = ({ usuario, onLogout }) => {
             
             setMensagem('Agendamento criado com sucesso!');
             setNovoAgendamento({
-                empresa_id: '',
+                empresa_id: dados?.empresa_id || '',
                 pet_id: '',
                 data_hora: '',
                 transporte: false,
-                servicos: []
+                servicos: dados?.servicosSelecionados ? dados.servicosSelecionados.map(id => ({ servico_id: id })) : []
             });
             
             carregarAgendamentos();
@@ -143,7 +160,7 @@ const Agendamento = ({ usuario, onLogout }) => {
     return (
         <div style={styles.container}>
             <Header 
-                titulo="📅 Agendamentos" 
+                titulo="Agendamentos" 
                 onLogout={onLogout}
             />
 
@@ -153,8 +170,23 @@ const Agendamento = ({ usuario, onLogout }) => {
                 </div>
             )}
 
+            {dados?.empresa_id && (
+                <div style={styles.alerta}>
+                    <div style={styles.card}>
+                        <h3>Resumo do Pedido</h3>
+                        <p><strong>Petshop:</strong> {dados.empresa_nome}</p>
+                        <p><strong>Serviços selecionados:</strong> {
+                            servicos
+                                .filter(s => dados.servicosSelecionados?.includes(s.servico_id))
+                                .map(s => s.tipo)
+                                .join(', ')
+                        }</p>
+                    </div>
+                </div>
+            )}
+
             <div style={styles.card}>
-                <h3>Novo Agendamento</h3>
+                <h3>Preencha os dados do agendamento</h3>
                 <form onSubmit={criarAgendamento}>
                     <div style={styles.formLinha}>
                         <div style={styles.inputGroup}>
@@ -178,7 +210,13 @@ const Agendamento = ({ usuario, onLogout }) => {
                             <label>Empresa:</label>
                             <select
                                 value={novoAgendamento.empresa_id}
-                                onChange={(e) => setNovoAgendamento({...novoAgendamento, empresa_id: e.target.value})}
+                                onChange={(e) => {
+                                    setNovoAgendamento({
+                                        ...novoAgendamento, 
+                                        empresa_id: e.target.value,
+                                        servicos: []
+                                    });
+                                }}
                                 style={styles.input}
                                 required
                             >
@@ -223,6 +261,7 @@ const Agendamento = ({ usuario, onLogout }) => {
                                 <label key={servico.servico_id} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                                     <input
                                         type="checkbox"
+                                        checked={novoAgendamento.servicos.some(s => s.servico_id === servico.servico_id)}
                                         onChange={(e) => handleServicoChange(servico.servico_id, e.target.checked)}
                                     />
                                     {servico.tipo} - R$ {servico.portes?.[0]?.preco_porte || '0.00'}
