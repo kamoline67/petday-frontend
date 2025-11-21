@@ -16,7 +16,7 @@ const Pets = ({ usuario, onLogout }) => {
         especie: '',
         raca: '',
         idade: '',
-        sexo: 'I',
+        sexo: 'M',
         porte_id: '1'
     });
 

@@ -27,7 +27,7 @@ const Cadastro = ({ onRegisterSuccess, onBackToLogin}) => {
         setCarregando(true);
         setMensagem('');
 
-        if (formData.Data.senha !== formData.confirmarSenha) {
+        if (formData.senha !== formData.confirmarSenha) {
             setMensagem('As senhas não coincidem.');
             setCarregando(false);
             return;
@@ -98,7 +98,7 @@ const Cadastro = ({ onRegisterSuccess, onBackToLogin}) => {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        style={style.input}
+                        style={styles.input}
                         required
                     />
                 </div>

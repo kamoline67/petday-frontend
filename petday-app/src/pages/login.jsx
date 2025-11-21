@@ -3,7 +3,7 @@ import api from '../services/api';
 import { styles } from '../styles/globalstyles';
 import { salvarUsuario } from '../utils/auth';
 
-const Login = ({ onLoginSucess, onNavigateToRegister }) =>
+const Login = ({ onLoginSuccess, onNavigateToRegister }) =>
 {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
@@ -22,7 +22,7 @@ const Login = ({ onLoginSucess, onNavigateToRegister }) =>
             });
 
             salvarUsuario(response.data.token, response.data.cliente);
-            onLoginSucess(response.data.cliente);
+            onLoginSuccess(response.data.cliente);
 
             setMensagem('Login realizado com sucesso!');
         } catch (error) {
@@ -71,7 +71,7 @@ const Login = ({ onLoginSucess, onNavigateToRegister }) =>
                 <p>Não tem uma conta?</p>
                 <button 
                     onClick={onNavigateToRegister}
-                    style={style.botaoSecundario}
+                    style={styles.botaoSecundario}
                 >
                     Criar Conta
                 </button>
