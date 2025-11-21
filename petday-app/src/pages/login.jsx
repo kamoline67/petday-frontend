@@ -3,8 +3,7 @@ import api from '../services/api';
 import { styles } from '../styles/globalstyles';
 import { salvarUsuario } from '../utils/auth';
 
-const Login = ({ onLoginSuccess, onNavigateToRegister }) =>
-{
+const Login = ({ onLoginSuccess, onNavigateToRegister, onNavigateToHome }) => {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [carregando, setCarregando] = useState(false);
@@ -64,7 +63,7 @@ const Login = ({ onLoginSuccess, onNavigateToRegister }) =>
                     disabled={carregando}
                     style={carregando ? styles.botaoDesabilitado : styles.botaoPrimario}>
                         {carregando ? 'Entrando...' : 'Entrar'}
-                    </button>
+                </button>
             </form>
 
             <div style={{ textAlign: 'center', marginTop: '20px' }}>
@@ -74,6 +73,20 @@ const Login = ({ onLoginSuccess, onNavigateToRegister }) =>
                     style={styles.botaoSecundario}
                 >
                     Criar Conta
+                </button>
+            </div>
+
+            <div style={{ textAlign: 'center', marginTop: '15px' }}>
+                <button 
+                    onClick={onNavigateToHome}
+                    style={{
+                        ...styles.botaoSecundario,
+                        backgroundColor: 'transparent',
+                        color: '#666',
+                        border: '1px solid #ddd'
+                    }}
+                >
+                    Voltar para Página Inicial
                 </button>
             </div>
 

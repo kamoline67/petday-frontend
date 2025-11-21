@@ -56,7 +56,7 @@ function App() {
             case 'home':
                 return <Home onNavigateToLogin={() => navegarPara('login')} onNavigateToFeed={() => navegarPara('feed')} />;
             case 'login':
-                return <Login onLoginSuccess={handleLoginSuccess} onNavigateToRegister={() => navegarPara('cadastro')} />;
+                return <Login onLoginSuccess={handleLoginSuccess} onNavigateToRegister={() => navegarPara('cadastro')} onNavigateToHome={() => navegarPara('home')} />;
             case 'cadastro': 
                 return <Cadastro onRegisterSuccess={handleRegisterSuccess} onBackToLogin={() => navegarPara('login')} />;
             case 'feed':
