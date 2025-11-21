@@ -9,11 +9,12 @@ import Pagamento from './pages/pagamento';
 import Perfil from './pages/perfil';
 import Feed from './pages/feed';
 import PetshopDetalhes from './pages/petshop-detalhes';
+import Home from './pages/home';
 
 function App() {
     const [usuario, setUsuario] = useState(null);
     const [carregando, setCarregando] = useState(true);
-    const [paginaAtual, setPaginaAtual] = useState('feed');
+    const [paginaAtual, setPaginaAtual] = useState('home');
     const [dadosNavegacao, setDadosNavegacao] = useState({});
 
     useEffect(() => {
@@ -36,7 +37,7 @@ function App() {
     const handleLogout = () => {
         removerUsuario();
         setUsuario(null);
-        setPaginaAtual('login');
+        setPaginaAtual('home');
     };
 
     const handleUsuarioAtualizado = (novosDados) => {
@@ -52,6 +53,12 @@ function App() {
 
     const renderizarPagina = () => {
         switch (paginaAtual) {
+            case 'home':
+                return <Home onNavigateToLogin={() => navegarPara('login')} onNavigateToFeed={() => navegarPara('feed')} />;
+            case 'login':
+                return <Login onLoginSuccess={handleLoginSuccess} onNavigateToRegister={() => navegarPara('cadastro')} />;
+            case 'cadastro': 
+                return <Cadastro onRegisterSuccess={handleRegisterSuccess} onBackToLogin={() => navegarPara('login')} />;
             case 'feed':
                 return <Feed usuario={usuario} onLogout={handleLogout} onNavegarPara={navegarPara} />;
             case 'petshop-detalhes':
@@ -65,7 +72,7 @@ function App() {
             case 'pets':
                 return <Pets usuario={usuario} onLogout={handleLogout} onNavegarPara={navegarPara} />;
             default:
-                return <Feed usuario={usuario} onLogout={handleLogout} onNavegarPara={navegarPara} />;
+                return <Home onNavigatoToLogin={() => setPaginaAtual('login')} onNavigateToFeed={() => setPaginaAtual('feed')} />;
         }
     };
 
@@ -106,22 +113,7 @@ function App() {
 
     return (
         <div style={styles.app}>
-            {usuario ? (
-                <>
-                    <MenuNavegacao />
-                    {renderizarPagina()}
-                </>
-                ): paginaAtual === 'cadastro' ? (
-                    <Cadastro
-                        onRegisterSuccess={handleRegisterSuccess}
-                        onBackToLogin={() => navegarPara('login')}
-                    />
-            ) : (
-                    <Login
-                        onLoginSuccess={handleLoginSuccess}
-                        onNavigateToRegister={() => navegarPara('cadastro')}
-                    />
-                )}
+            {renderizarPagina()}
         </div>
     );
 }

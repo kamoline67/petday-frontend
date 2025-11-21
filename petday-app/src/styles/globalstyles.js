@@ -164,5 +164,42 @@ export const styles = {
         backgroundColor: '#e0e0e0',
         borderRadius: '4px',
         Animation: 'pulse 1.5s ease-in-out infinite'
+    },
+
+    hero: {
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        padding: '100px 2rem',
+        textAlign: 'center',
+    },
+
+    featureCard: {
+        textAlign: 'center',
+        padding: '2rem',
+        borderRadius: '10px',
+        backgroundColor: 'f8f9fa',
+        transition: 'transform 0.3s, ease',
+        cursor: 'pointer',
+    },
+
+    teamCard: {
+        textAlign: 'center',
+        padding: '2rem',
+        borderRadius: '10px',
+        backgroundColor: '#f8f9fa',
+        transition: 'transform 0.3s, ease',
+    },
+
+    stepCircle: {
+        width: '60px',
+        height: '60px',
+        borderRadius: '50%',
+        backgroundColor: '#007bff',
+        color: 'white',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '1.5rem',
+        margin: '0 auto 1rem',
     }
 }
