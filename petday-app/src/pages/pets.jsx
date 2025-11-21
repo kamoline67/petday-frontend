@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { styles } from '../styles/globalstyles';
-import Header from '../components/Header';
-import petCard from '../components/PetCard';
-import Loading from '../components/Loading';
+import Header from '../components/header';
+import petCard from '../components/petCard';
+import Loading from '../components/loading';
 
 const Pets = ({ usuario, onLogout }) => {
     const [pets, setPets] = useState([]);

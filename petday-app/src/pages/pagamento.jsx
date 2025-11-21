@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { styles } from '../styles/globalstyles';
-import Header from '../components/Header';
-import Loading from '../components/Loading';
+import Header from '../components/header';
+import Loading from '../components/loading';
 
 const Pagamento = ({ usuario, onLogout }) => {
     const [carregando, setCarregando] = useState(false);

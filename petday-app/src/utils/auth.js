@@ -5,7 +5,7 @@ export const salvarUsuario = (token, usuario) => {
 
 export const removerUsuario = () => {
     localStorage.removeItem('token');
-    localStorage.removerItem('user');
+    localStorage.removeItem('user');
 };
 
 export const estaLogado = () => {

@@ -39,6 +39,7 @@ export const styles = {
     botaoAtivo:  {
         padding: '10px 20px',
         border: '1px solid #007bff',
+        backgroundColor: '#007bff',
         color: 'white',
         borderRadius: '4px',
         cursor: 'pointer',
@@ -53,7 +54,7 @@ export const styles = {
         backgroundColor: 'white',
         padding: '20px',
         borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
     },
 
     formLinha: {
