@@ -1,81 +1,54 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { estaLogado, getUsuarioAtual } from '../../utils/auth';
 import Button from '../UI/Button';
+import Logo from '../UI/Logo';
 
 const Header = ({ onLogout, onNavigateTo }) => {
   const usuario = getUsuarioAtual();
+  const [MenuOpen, setMenuOpen] = useState(false);
+
+  const handleNavigation = (page) => {
+    onNavigateTo(page);
+    setMenuOpen(false);
+  };
 
   return (
-    <header className="bg-white shadow-2xl border-b border-neutral-200 sticky top-0 z-50">
-      <div className="container-custom">
-        <div className="flex justify-between items-center py-6">
-          <div 
-            className="flex items-center space-x-4 cursor-pointer group"
-            onClick={() => onNavigateTo('home')}
-          >
-            <div className="w-12 h-12 bg-primary-500 rounded-2xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300">
-              <span className="text-white font-bold text-2xl">🐾</span>
+          <header className="relative top-0 left-0 w-full z-50 overflow-visible">
+            <div className="absolute top-0 left-0 w-full pointer-events-none z-0">
+              <svg viewBox="0 0 1920 430" className="w-full h-full object-cover">
+                <path fill="#ff7c1f" d="M0 0h1920v215c-82-6-142 21-276 4-160-20-209-68-355-63-184 7-326 99-565 129C360 332 179 250 0 215V0z"/>
+              </svg>
             </div>
-            <div>
-              <h1 className="text-3xl font-display font-black text-secondary-500">PetDay</h1>
-              <p className="text-primary-500 font-semibold text-sm -mt-1">Cuidando com amor</p>
+            <div 
+              className="cursor-pointer group transform transition-all duration-500 hover:scale-105 lg:flex-1"
+              onClick={() => onNavigateTo('home')}
+            >
+              <div className="flex-1 flex justify-center">
+                <img 
+                  src="/logo.png" 
+                  alt="PetDay Logo"
+                  className="w-36 md:w-48 drop-shadow-xl"
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Navigation */}
-          <nav className="flex items-center space-x-6">
-            {estaLogado() ? (
-              <>
-                <button 
-                  onClick={() => onNavigateTo('feed')}
-                  className="text-secondary-500 font-semibold text-lg hover:text-primary-500 transition-colors duration-300"
-                >
-                  Início
-                </button>
-                <button 
-                  onClick={() => onNavigateTo('pets')}
-                  className="text-secondary-500 font-semibold text-lg hover:text-primary-500 transition-colors duration-300"
-                >
-                  Meus Pets
-                </button>
-                <button 
-                  onClick={() => onNavigateTo('agendamento')}
-                  className="text-secondary-500 font-semibold text-lg hover:text-primary-500 transition-colors duration-300"
-                >
-                  Agendamentos
-                </button>
-                <div className="flex items-center space-x-4">
-                  <span className="text-secondary-700 font-medium">Olá, {usuario.nome}!</span>
-                  <Button 
-                    variant="outline" 
-                    size="md"
-                    onClick={onLogout}
-                  >
-                    Sair
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <div className="flex items-center space-x-4">
+              <div className="relative z-20 flex-1 flex items-center space-x-4"> 
                 <Button 
-                  variant="outline" 
+                  variant="outline"
                   size="md"
-                  onClick={() => onNavigateTo('login')}
+                  onClick={() => handleNavigation('login')} 
+                  className="border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white" 
                 >
-                  Entrar
-                </Button>
+                  Entrar 
+                </Button> 
                 <Button 
-                  size="md"
-                  onClick={() => onNavigateTo('cadastro')}
+                  size="md" onClick={() => handleNavigation('cadastro')} 
+                  className="bg-primary-600 hover:bg-primary-700"
                 >
                   Cadastrar
                 </Button>
               </div>
-            )}
-          </nav>
-        </div>
-      </div>
-    </header>
+      </header>
   );
 };
 
