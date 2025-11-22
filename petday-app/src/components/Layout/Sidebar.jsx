@@ -30,13 +30,12 @@ const Sidebar = ({ isOpen, onClose, onNavigateTo, onLogout }) => {
       )}
 
 
-      <div className={`
-        fixed lg:static inset-y-0 left-0 z-50
-        w-80 bg-white shadow-2xl border-r border-orange-200
-        transform transition-all duration-500 ease-in-out
-        flex flex-col
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
+        <div className={`
+            w-80 bg-white shadow-2xl border-r border-orange-200
+            flex flex-col h-full
+            ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+            lg:translate-x-0
+        `}>
         
 
         <div className="p-6 border-b border-orange-100 bg-gradient-to-r from-orange-50 to-orange-100">

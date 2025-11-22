@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import SimpleBar from 'simplebar-react';
+import 'simplebar-react/dist/simplebar.min.css';
+
 import { estaLogado, getUsuarioAtual, removerUsuario, salvarUsuario } from './utils/auth';
 
 import Header from './components/Layout/Header';
@@ -167,33 +170,51 @@ function App() {
     }
 
     return (
-        <div className="App min-h-screen bg-neutral-50 flex flex-col">
-
-            <Sidebar 
-                isOpen={sidebarOpen}
-                onClose={closeSidebar}
-                onNavigateTo={navegarPara}
-                onLogout={handleLogout}
-            />
-
-
-            <div className={`flex-1 flex flex-col transition-all duration-300 ${
-                sidebarOpen ? 'lg:ml-80' : 'lg:ml-0'
-            }`}>
-
-                <Header 
-                    sidebarOpen={sidebarOpen}
-                    onToggleSidebar={toggleSidebar}
-                    onLogout={handleLogout}
+        <div className="App min-h-screen bg-neutral-50 flex">
+            {/* Sidebar */}
+            <div className={`
+                ${sidebarOpen ? 'sidebar-mobile open' : 'sidebar-mobile'}
+                lg:sidebar-desktop
+            `}>
+                <Sidebar 
+                    isOpen={sidebarOpen}
+                    onClose={closeSidebar}
                     onNavigateTo={navegarPara}
+                    onLogout={handleLogout}
                 />
-                
-                <main className="flex-1 bg-white">
-                    <div className="min-h-full">
-                        {renderizarPagina()}
-                    </div>
-                </main>
             </div>
+
+            {/* Overlay para mobile */}
+            {sidebarOpen && (
+                <div 
+                    className="sidebar-overlay lg:hidden"
+                    onClick={closeSidebar}
+                />
+            )}
+
+            {/* SimpleBar ENVOLVENDO TUDO (incluindo header) */}
+            <SimpleBar 
+                className="flex-1 custom-scrollbar"
+                style={{ 
+                    height: '100vh',
+                    position: 'relative'
+                }}
+                autoHide={false}
+            >
+                <div className="flex top-0 z-1000 bg-white">
+                    <Header 
+                        sidebarOpen={sidebarOpen}
+                        onToggleSidebar={toggleSidebar}
+                        onLogout={handleLogout}
+                        onNavigateTo={navegarPara}
+                    />
+                </div>
+                
+                {/* Conteúdo principal */}
+                <main className="bg-white min-h-full">
+                    {renderizarPagina()}
+                </main>
+            </SimpleBar>
         </div>
     );
 }

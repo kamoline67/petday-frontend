@@ -14,15 +14,9 @@ const Home = ({ onNavigateToLogin, onNavigateToFeed, onLogout, onNavigateTo }) =
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="container-custom section-padding relative">
           <div className="text-center max-w-5xl mx-auto">
-            <h1 className="text-display display-lg mb-8 animate-fade-in">
-              Cuidamos do seu
-              <span className="block text-secondary-200 drop-shadow-2xl">
-                melhor amigo
-              </span>
-            </h1>
             <p className="text-2xl md:text-3xl text-white/90 mb-12 leading-relaxed max-w-3xl mx-auto">
               Agendamento online para banho, tosa, vacina e muito mais. 
-              <span className="block font-semibold">Rápido, seguro e com amor.</span>
+              <span className="block font-semibold">Rápido, prático e seguro.</span>
             </p>
             {!estaLogado() ? (
               <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
