@@ -40,6 +40,65 @@
   animation: slideDown 0.2s ease-out;
 }
 
+/* Animações personalizadas para a patinha */
+@keyframes paw-pulse {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.paw-pulse {
+  animation: paw-pulse 2s ease-in-out infinite;
+}
+
+/* Melhorar a transição do menu lateral */
+.menu-slide {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.paw-container {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.paw-container:hover {
+  filter: drop-shadow(0 6px 12px rgba(255, 124, 31, 0.4));
+}
+
+.paw-rotate {
+  transition: transform 0.5s ease-in-out;
+}
+
+.paw-rotate.open {
+  transform: rotate(90deg) translateX(8px);
+}
+
+.paw-glow {
+  box-shadow: 0 0 20px rgba(255, 124, 31, 0.3);
+}
+
+.paw-glow:hover {
+  box-shadow: 0 0 30px rgba(255, 124, 31, 0.5);
+}
+
+.paw-image {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+/* Garantir que o SVG da onda não atrapalhe o menu */
+.header-wave {
+  z-index: 0;
+}
+
+.header-content {
+  z-index: 10;
+}
+
 @layer components {
   .btn-primary {
     @apply bg-primary-500 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-primary-600 transition-all duration-300 hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-primary-200;

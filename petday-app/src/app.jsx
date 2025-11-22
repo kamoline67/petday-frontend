@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { estaLogado, getUsuarioAtual, removerUsuario, salvarUsuario } from './utils/auth';
 
+import Header from './components/Layout/Header';
+import Sidebar from './components/Layout/Sidebar';
 import Home from './pages/home';
 import Login from './pages/login';
 import Cadastro from './pages/cadastro';
@@ -16,30 +18,40 @@ function App() {
     const [carregando, setCarregando] = useState(true);
     const [paginaAtual, setPaginaAtual] = useState('home');
     const [dadosNavegacao, setDadosNavegacao] = useState({});
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     useEffect(() => {
-
+        console.log('App - Verificando autenticação...');
         if (estaLogado()) {
-            setUsuario(getUsuarioAtual());
+            const user = getUsuarioAtual();
+            console.log('Usuário logado:', user);
+            setUsuario(user);
+        } else {
+            console.log('Nenhum usuário logado');
         }
         setCarregando(false);
     }, []);
 
     const handleLoginSuccess = (usuarioData) => {
+        console.log('Login realizado com sucesso:', usuarioData);
         setUsuario(usuarioData);
         setPaginaAtual('feed');
+        setSidebarOpen(false);
     };
 
     const handleRegisterSuccess = (usuarioData) => {
+        console.log('Cadastro realizado com sucesso:', usuarioData);
         setUsuario(usuarioData);
         setPaginaAtual('feed');
+        setSidebarOpen(false);
     };
 
     const handleLogout = () => {
+        console.log('Usuário deslogado');
         removerUsuario();
         setUsuario(null);
         setPaginaAtual('home');
-        setDadosNavegacao({});
+        setSidebarOpen(false);
     };
 
     const handleUsuarioAtualizado = (novosDados) => {
@@ -49,24 +61,37 @@ function App() {
     };
 
     const navegarPara = (pagina, dados = {}) => {
+        console.log('Navegando para:', pagina, dados);
         setPaginaAtual(pagina);
         setDadosNavegacao(dados);
+        setSidebarOpen(false);
+    };
+
+    const toggleSidebar = () => {
+        console.log('Toggle sidebar - Estado atual:', sidebarOpen);
+        setSidebarOpen(!sidebarOpen);
+    };
+
+    const closeSidebar = () => {
+        console.log('Fechando sidebar');
+        setSidebarOpen(false);
     };
 
     const renderizarPagina = () => {
+        console.log('Renderizando página:', paginaAtual);
+
         const propsComuns = {
+            usuario,
             onLogout: handleLogout,
             onNavigateTo: navegarPara,
         };
 
         switch (paginaAtual) {
             case 'home':
-                return <Home
-                    onLogout={handleLogout}
-                    onNavigateTo={navegarPara} 
+                return <Home 
+                    {...propsComuns}
                     onNavigateToLogin={() => navegarPara('login')} 
                     onNavigateToFeed={() => navegarPara('feed')}
-                    {...propsComuns}
                 />;
                 
             case 'login':
@@ -87,49 +112,43 @@ function App() {
                 
             case 'feed':
                 return <Feed 
-                    usuario={usuario} 
-                    dados={dadosNavegacao}
                     {...propsComuns}
+                    dados={dadosNavegacao}
                 />;
                 
             case 'petshop-detalhes':
                 return <PetshopDetalhes 
-                    usuario={usuario} 
-                    dados={dadosNavegacao}
                     {...propsComuns}
+                    dados={dadosNavegacao}
                 />;
                 
             case 'agendamento':
                 return <Agendamento 
-                    usuario={usuario} 
-                    dados={dadosNavegacao}
                     {...propsComuns}
+                    dados={dadosNavegacao}
                 />;
                 
             case 'pagamento':
                 return <Pagamento 
-                    usuario={usuario} 
                     {...propsComuns}
                 />;
                 
             case 'perfil':
                 return <Perfil 
-                    usuario={usuario} 
-                    onUsuarioAtualizado={handleUsuarioAtualizado}
                     {...propsComuns}
+                    onUsuarioAtualizado={handleUsuarioAtualizado}
                 />;
                 
             case 'pets':
                 return <Pets 
-                    usuario={usuario} 
                     {...propsComuns}
                 />;
                 
             default:
                 return <Home 
+                    {...propsComuns}
                     onNavigateToLogin={() => navegarPara('login')} 
                     onNavigateToFeed={() => navegarPara('feed')}
-                    {...propsComuns}
                 />;
         }
     };
@@ -138,18 +157,43 @@ function App() {
         return (
             <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="w-16 h-16 bg-primary-500 rounded-2xl flex items-center justify-center text-2xl text-white mb-4 mx-auto animate-pulse">
+                    <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center text-2xl text-white mb-4 mx-auto animate-pulse">
                         🐾
                     </div>
-                    <p className="text-secondary-500 text-lg font-semibold">Carregando PetDay...</p>
+                    <p className="text-dark-700 text-lg font-semibold">Carregando PetDay...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="App">
-            {renderizarPagina()}
+        <div className="App min-h-screen bg-neutral-50 flex flex-col">
+
+            <Sidebar 
+                isOpen={sidebarOpen}
+                onClose={closeSidebar}
+                onNavigateTo={navegarPara}
+                onLogout={handleLogout}
+            />
+
+
+            <div className={`flex-1 flex flex-col transition-all duration-300 ${
+                sidebarOpen ? 'lg:ml-80' : 'lg:ml-0'
+            }`}>
+
+                <Header 
+                    sidebarOpen={sidebarOpen}
+                    onToggleSidebar={toggleSidebar}
+                    onLogout={handleLogout}
+                    onNavigateTo={navegarPara}
+                />
+                
+                <main className="flex-1 bg-white">
+                    <div className="min-h-full">
+                        {renderizarPagina()}
+                    </div>
+                </main>
+            </div>
         </div>
     );
 }

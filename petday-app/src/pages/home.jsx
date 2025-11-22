@@ -10,9 +10,6 @@ const Home = ({ onNavigateToLogin, onNavigateToFeed, onLogout, onNavigateTo }) =
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      <Header onLogout={onLogout} onNavigateTo={onNavigateTo} />
-      
-      {/* Hero Section */}
       <section className="gradient-bg text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="container-custom section-padding relative">
